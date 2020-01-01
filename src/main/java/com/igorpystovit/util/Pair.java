@@ -1,4 +1,4 @@
-package com.igorpystovit;
+package com.igorpystovit.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,141 +1,178 @@
 package com.igorpystovit;
 
+import com.igorpystovit.resolvers.InitPointPositionResolver;
+import com.igorpystovit.resolvers.TextPositionResolver;
+import com.igorpystovit.util.Pair;
+import javafx.animation.*;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
+import javafx.scene.shape.Polygon;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Application extends javafx.application.Application {
+    private InitPointPositionResolver positionResolver = new InitPointPositionResolver();
+    private HexShape HEX;
+
     public static void main(String[] args) {
         launch(args);
     }
 
+
     @Override
     public void start(Stage primaryStage) {
-        Canvas canvas = new Canvas(1000,1000);
-        GraphicsContext context = canvas.getGraphicsContext2D();
-        context.setFill(Color.RED);
-        context.setStroke(Color.BLUE);
-        context.setLineWidth(5);
 
-        Set<HexShape> shapes = new HashSet<>();
-//
-        HexShape startHex = new HexShape(400,450);
-        HexShape hex = new HexShape();
-        hex.getNearShapes().put(2,new HexShape());
-        startHex.getNearShapes().put(1,hex);
-        startHex.getNearShapes().put(2,new HexShape());
-        startHex.getNearShapes().put(4,new HexShape());
-        startHex.getNearShapes().put(3,new HexShape());
-        startHex.getNearShapes().put(5,new HexShape());
-        startHex.getNearShapes().put(6,new HexShape());
-        shapes.add(startHex);
-        shapes.addAll(hex.getNearShapes().values());
-        shapes.addAll(startHex.getNearShapes().values());
-        resolveInitPairs(shapes);
-        draw(shapes,context);
-//        Map<Integer,Pair> coordinateMap = startHex.getCoordinates();
-//
-//        double[] x = coordinateMap.values().stream().mapToDouble(Pair::getX).toArray();
-//        double[] y = coordinateMap.values().stream().mapToDouble(Pair::getY).toArray();
-//
-//        context.strokePolygon(x,y,6);
-//        context.fillPolygon(x,y, 6);
-////
-//        HexShape hex2 = new HexShape(400,350);
-//        Map<Integer,Pair> coordinateMap2 = hex2.getCoordinates();
-//
-//        double[] x2 = coordinateMap2.values().stream().mapToDouble(Pair::getX).toArray();
-//        double[] y2 = coordinateMap2.values().stream().mapToDouble(Pair::getY).toArray();
-//
-//        context.strokePolygon(x2,y2,6);
-//        context.fillPolygon(x2,y2, 6);
+        Set<HexShape> hexagon = new HexagonTileMapGenerator().generate(100,1600,1000);
 
+//        Set<HexShape> hexagon = HardcodedHexagonMap.getHexagonMap();
 
-//        drawShapes(context);
-//
-////        context.setStroke(Color.RED);
-////        context.strokeLine(50,50,100,100);
-//        Pane root = new Pane();
-//        root.getChildren().add(canvas);
-//        Polygon hexagon = new Polygon();
-//
-//        //spotsize 100
-//        hexagon.getPoints().addAll(new Double[]{
-//                100.0, 50.0,
-//                150.0, 50.0,
-//                175.0, 100.0,
-//                150.0, 150.0,
-//                100.0, 150.0,
-//                75.0, 100.0,
-//        });
-//        hexagon.getPoints()
-//        hexagon.setStrokeWidth(5);
-////        hexagon.setStroke(Color.RED);
-//        hexagon.setRotate(90);
-//        hexagon.setFill(Color.valueOf("#0061ff"));
+//        hexagon.forEach(h -> System.out.println(h.getNearShapes().size()));
 
-//        StrokeTransition strokeTransition = new StrokeTransition(Duration.millis(1111));
-//        strokeTransition.setShape(hexagon);
+//        resolveInitPairs(hexagon);
+//
+//        HexShape hex1 = (HexShape) hexagon.toArray()[1];
+//        HexShape startHex = hex1.getConnections().get(4);
+//
+//        hex1.removeConnection(startHex);
+//        hexagon.remove(startHex);
 
-//        strokeTransition.setFromValue(Color.BLACK);
-//        strokeTransition.setToValue(Color.WHITE);
+//        System.out.println(hexagon);
+
+        List<Polygon> hexagons = createHexagons(hexagon);
+        List<Text> texts = resolveTextPositions(hexagon);
+//        HexShape hex = new HexShape(400,500,4);
 //
-//        ParallelTransition parallelTransition = new ParallelTransition(strokeTransition);
-//        parallelTransition.setCycleCount(Timeline.INDEFINITE);
-//        parallelTransition.setAutoReverse(true);
-//        parallelTransition.play();
-//
+//        Polygon polygon = createHexagon(hex);
+//        Text text = resolveTextPosition(hex);
+
         Group root = new Group();
-        root.getChildren().add(canvas);
-        primaryStage.setScene(new Scene(root));
+//        root.getChildren().add(polygon);
+//        root.getChildren().add(text);
+        root.getChildren().addAll(hexagons);
+        root.getChildren().addAll(texts);
+        root.getChildren().add(getGenerateButton(primaryStage));
+        Scene scene = new Scene(root, 2000, 1000);
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void resolveInitPairs(Collection<HexShape> shapes){
-        InitPointPositionResolver pointPositionResolver = new InitPointPositionResolver();
-        shapes.forEach(pointPositionResolver::resolveNear);
-    }
+    private Button getGenerateButton(Stage stage){
+        Button button = new Button("Generate");
+        button.setPrefSize(100,20);
+        button.setLayoutX(1700);
+        button.setLayoutY(400);
+        button.setOnMouseClicked(mouseClicked -> {
+            Set<HexShape> hexagon = new HexagonTileMapGenerator().generate(100,1600,1000);
+            List<Polygon> hexagons = createHexagons(hexagon);
+            List<Text> texts = resolveTextPositions(hexagon);
 
-    private void draw(Collection<HexShape> shapes,GraphicsContext context){
-        for(HexShape tempShape : shapes){
-            Map<Integer,Pair> coordinateMap = tempShape.getCoordinates();
-            double[] x = coordinateMap.values().stream().mapToDouble(Pair::getX).toArray();
-            double[] y = coordinateMap.values().stream().mapToDouble(Pair::getY).toArray();
-            context.strokePolygon(x,y,6);
-            context.fillPolygon(x,y, 6);
+            Group root = new Group();
+            root.getChildren().addAll(hexagons);
+            root.getChildren().addAll(texts);
+            root.getChildren().add(button);
+            Scene scene = new Scene(root, 2000, 1000);
+            stage.setScene(scene);
+            stage.show();
+        });
+        return button;
+    }
+    private void resolveInitPairs(Collection<HexShape> shapes) {
+        InitPointPositionResolver pointPositionResolver = new InitPointPositionResolver();
+
+        shapes.forEach(pointPositionResolver::resolveConnectionsInitPoints);
+
+        //resolution of isolated hexes
+        Random random = new Random();
+        double maxX = shapes.stream().mapToDouble(shape -> shape.getInitPair().getX()).max().orElseThrow(NoSuchElementException::new) + HexShape.SPOT_SIZE * 3;
+        double minY = shapes.stream().mapToDouble(shape -> shape.getInitPair().getY()).min().orElseThrow(NoSuchElementException::new);
+        Pair prev = new Pair(maxX, minY);
+        for (HexShape isolatedHexes : pointPositionResolver.getIsolatedHexes()) {
+            isolatedHexes.setInitPair(new Pair(
+                    prev.getX() + random.nextInt(100) + HexShape.SPOT_SIZE,
+                    prev.getY() + random.nextInt(100) + HexShape.SPOT_SIZE));
+            prev.setX(prev.getX() + (HexShape.SPOT_SIZE * 2));
+            prev.setY(prev.getY() + (HexShape.SPOT_SIZE * 3));
         }
     }
 
-    private void drawShapes(GraphicsContext gc) {
-        gc.setFill(Color.RED);
-        gc.setStroke(Color.BLUE);
-        gc.setLineWidth(5);
-
-        gc.strokeLine(40, 10, 10, 40);
-        gc.fillOval(10, 60, 30, 30);
-        gc.strokeOval(60, 60, 30, 30);
-        gc.fillRoundRect(110, 60, 30, 30, 10, 10);
-        gc.strokeRoundRect(160, 60, 30, 30, 10, 10);
-        gc.fillArc(10, 110, 30, 30, 45, 240, ArcType.OPEN);
-        gc.fillArc(60, 110, 30, 30, 45, 240, ArcType.CHORD);
-        gc.fillArc(110, 110, 30, 30, 45, 240, ArcType.ROUND);
-        gc.strokeArc(10, 160, 30, 30, 45, 240, ArcType.OPEN);
-        gc.strokeArc(60, 160, 30, 30, 45, 240, ArcType.CHORD);
-        gc.strokeArc(110, 160, 30, 30, 45, 240, ArcType.ROUND);
-        gc.fillPolygon(new double[]{10, 40, 10, 40},
-                new double[]{210, 210, 240, 240}, 4);
-        gc.strokePolygon(new double[]{60, 90, 60, 90},
-                new double[]{210, 210, 240, 240}, 4);
-        gc.strokePolyline(new double[]{110, 140, 110, 140},
-                new double[]{210, 210, 240, 240}, 4);
+    private List<Text> resolveTextPositions(Collection<HexShape> shapes) {
+        return new TextPositionResolver().resolveTextPositions(shapes);
     }
+
+    private void draw(Collection<HexShape> shapes, GraphicsContext context) {
+        for (HexShape tempShape : shapes) {
+            Map<Integer, Pair> coordinateMap = tempShape.getCoordinateMap();
+            double[] x = coordinateMap.values().stream().mapToDouble(Pair::getX).toArray();
+            double[] y = coordinateMap.values().stream().mapToDouble(Pair::getY).toArray();
+            context.strokePolygon(x, y, 6);
+            context.fillPolygon(x, y, 6);
+        }
+    }
+
+    private List<Polygon> createHexagons(Collection<HexShape> shapes) {
+        List<Polygon> polygons = new ArrayList<>();
+
+        for (HexShape tempShape : shapes) {
+            Polygon polygon = new Polygon();
+            tempShape
+                    .getCoordinateMap()
+                    .values()
+                    .forEach(pair -> polygon.getPoints().addAll(pair.getX(), pair.getY()));
+            polygon.setStrokeWidth(5);
+            polygon.setStroke(Color.BLACK);
+            polygon.setFill(Color.valueOf("#ab8c1c"));
+
+            polygon.setOnMouseClicked(mouseEvent -> {
+                FillTransition fillTransition = new FillTransition(Duration.millis(800),polygon);
+                fillTransition.setFromValue(Color.valueOf(polygon.getFill().toString()));
+                fillTransition.setToValue(Color.WHITE);
+                fillTransition.setAutoReverse(true);
+                fillTransition.setCycleCount(Animation.INDEFINITE);
+                fillTransition.play();
+                HEX = tempShape;
+                System.out.println(HEX);
+                Timeline tl = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
+                }));
+
+                tl.setCycleCount(Timeline.INDEFINITE);
+                tl.play();
+
+            });
+            polygons.add(polygon);
+        }
+        return polygons;
+    }
+
+    private Polygon createHexagon(HexShape hex){
+        Polygon polygon = new Polygon();
+        hex
+                .getCoordinateMap()
+                .values()
+                .forEach(pair -> polygon.getPoints().addAll(pair.getX(), pair.getY()));
+        polygon.setStrokeWidth(5);
+        polygon.setStroke(Color.BLACK);
+        polygon.setFill(Color.valueOf("#ab8c1c"));
+        polygon.setOnMouseClicked(mouseEvent -> {
+            StrokeTransition strokeTransition = new StrokeTransition(Duration.millis(400));
+            strokeTransition.setShape(polygon);
+            strokeTransition.setAutoReverse(true);
+//                strokeTransition.setFromValue(Color.valueOf(polygon.getStroke().toString()));
+            strokeTransition.setFromValue(Color.BLACK);
+            strokeTransition.setToValue(Color.RED);
+            strokeTransition.setCycleCount(Animation.INDEFINITE);
+            strokeTransition.play();
+        });
+        return polygon;
+    }
+
+    private Text resolveTextPosition(HexShape hexShape){
+        return new TextPositionResolver().resolveTextPositions(Collections.singletonList(hexShape)).get(0);
+    }
+
 }
