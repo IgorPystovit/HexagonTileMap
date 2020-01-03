@@ -34,7 +34,6 @@ public class HardcodedHexagons {
 
 //        System.out.println(hexagon);
         PathSeeker pathSeeker = new PathSeeker();
-        pathSeeker.seekShortestPath(hexagon,hex1,hex8).forEach((h,v) -> System.out.println(h.getValue()+" = "+v));
         pathSeeker.seekPath(hexagon,hex1,hex8).forEach(hexShape -> System.out.print(hexShape.getValue()+" - "));
         return hexagon;
     }

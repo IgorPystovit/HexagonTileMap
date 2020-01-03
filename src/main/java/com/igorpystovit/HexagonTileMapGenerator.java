@@ -13,7 +13,7 @@ public class HexagonTileMapGenerator {
     private Random random = new Random();
     private InitPointPositionResolver positionResolver = new InitPointPositionResolver();
 
-    public Set<HexShape> generate(int mapSize,int width,int height){
+    public Set<HexShape> generate(int mapSize, int width, int height) {
         Set<HexShape> hexes = new LinkedHashSet<>();
         Set<HexShape> checkedHexes = new HashSet<>();
 
@@ -24,9 +24,9 @@ public class HexagonTileMapGenerator {
 
         HexShape randomUncheckedHex;
 
-        while (hexes.size() < mapSize){
-            randomUncheckedHex = getRandomHex(hexes,checkedHexes);
-            if (addConnections(randomUncheckedHex,hexes,mapSize,width,height)){
+        while (hexes.size() < mapSize) {
+            randomUncheckedHex = getRandomHex(hexes, checkedHexes);
+            if (addConnections(randomUncheckedHex, hexes, mapSize, width, height)) {
                 checkedHexes.add(randomUncheckedHex);
             }
         }
@@ -34,28 +34,27 @@ public class HexagonTileMapGenerator {
     }
 
     /**
-     * @return
-     * true if at least some of connections were added
+     * @return true if at least some of connections were added
      * false if no new connections were added
-     * */
-    private boolean addConnections(HexShape hexShape, Set<HexShape> hexes, int mapSize, int width, int height){
+     */
+    private boolean addConnections(HexShape hexShape, Set<HexShape> hexes, int mapSize, int width, int height) {
         int numberOfConnections = Math.abs(hexShape.getConnections().size() - 6);
         boolean connectionAdded = false;
 
-        if (numberOfConnections > 0){
+        if (numberOfConnections > 0) {
             HexShape tempHex;
 
             int connectionCounter = 0;
 
-            while ((connectionCounter < numberOfConnections) && (hexes.size() < mapSize)){
+            while ((connectionCounter < numberOfConnections) && (hexes.size() < mapSize)) {
                 tempHex = new HexShape(generateValue());
                 hexShape.addConnection(tempHex);
                 positionResolver.resolveConnectionsInitPoints(hexShape);
-                if (positioningCriteriaMet(tempHex,width,height)){
+                if (positioningCriteriaMet(tempHex, width, height)) {
                     connectionCounter++;
                     hexes.add(tempHex);
                     connectionAdded = true;
-                }else{
+                } else {
                     hexShape.removeConnection(tempHex);
                     return connectionAdded;
                 }
@@ -64,38 +63,38 @@ public class HexagonTileMapGenerator {
         return connectionAdded;
     }
 
-    private HexShape getRandomHex(Set<HexShape> hexes,Set<HexShape> checkedHexes){
+    private HexShape getRandomHex(Set<HexShape> hexes, Set<HexShape> checkedHexes) {
         HexShape randomHex;
-        do{
+        do {
             int hexIndex = random.nextInt(hexes.size());
             randomHex = (HexShape) hexes.toArray()[hexIndex];
-        }while (checkedHexes.contains(randomHex));
+        } while (checkedHexes.contains(randomHex));
         return randomHex;
     }
 
-    private int generateValue(){
-        return random.nextInt(25) + 10;
+    private int generateValue() {
+        return random.nextInt(99) + 1;
     }
 
-    private Pair getScreenCenterPair(){
+    private Pair getScreenCenterPair() {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         return new Pair(dimension.width / 2.0, dimension.getHeight() / 2.0);
     }
 
-    private boolean positioningCriteriaMet(HexShape hexShape, int width, int height){
+    private boolean positioningCriteriaMet(HexShape hexShape, int width, int height) {
         boolean yAxisCriteriaMet = false;
         boolean xAxisCriteriaMet = false;
 
-        if (hexShape.containsInitPair()){
+        if (hexShape.containsInitPair()) {
             yAxisCriteriaMet = hexShape.getCoordinateMap().values()
                     .stream()
                     .mapToDouble(Pair::getY)
-                    .noneMatch(y ->(y <= 0) || (y >= height));
+                    .noneMatch(y -> (y <= 0) || (y >= height));
 
             xAxisCriteriaMet = hexShape.getCoordinateMap().values()
                     .stream()
                     .mapToDouble(Pair::getX)
-                    .noneMatch(x ->(x <= 0) || (x >= width));
+                    .noneMatch(x -> (x <= 0) || (x >= width));
         }
 
         return yAxisCriteriaMet && xAxisCriteriaMet;

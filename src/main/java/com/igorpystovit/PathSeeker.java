@@ -5,17 +5,20 @@ import java.util.*;
 public class PathSeeker {
 
     //seek shortest paths using Dijkstra algorithm
-    public Map<HexShape, Integer> seekShortestPath(Set<HexShape> hexagon, HexShape begin, HexShape end) {
+    private Map<HexShape, Map<HexShape, Integer>> buildShortestPathMatrix(Set<HexShape> hexagon, HexShape begin, HexShape end) {
         Map<HexShape, Integer> pathMap = initPathMap(hexagon, begin);
         Set<HexShape> resolvedHexes = new HashSet<>();
+        Map<HexShape, Map<HexShape, Integer>> matrix = new LinkedHashMap<>();
+
+        matrix.putIfAbsent(begin, new LinkedHashMap<>(pathMap));
 
         while (resolvedHexes.size() < hexagon.size()) {
+
             if (resolvedHexes.contains(end)) {
-                return pathMap;
+                return matrix;
             }
 
-
-            double minPath = pathMap
+            int minPath = pathMap
                     .entrySet()
                     .stream()
                     .filter(entry -> !resolvedHexes.contains(entry.getKey()))
@@ -39,120 +42,37 @@ public class PathSeeker {
                 if ((currentValueOfTargetVertex + connectedHex.getValue()) < pathMap.get(connectedHex)) {
                     pathMap.put(connectedHex, currentValueOfTargetVertex + connectedHex.getValue());
                 }
-
+                matrix.put(targetHex, new LinkedHashMap<>(pathMap));
             }
         }
-
-        return pathMap;
+        return matrix;
     }
 
-    public Set<HexShape> seekPath(Set<HexShape> hexagon, HexShape begin, HexShape end) {
-        return buildPath(hexagon, seekShortestPath(hexagon, begin, end), begin, end);
-    }
-
-    private Set<HexShape> buildPath(Set<HexShape> hexagon, Map<HexShape, Integer> pathMap, HexShape begin, HexShape end) {
-        //init phase
+    private Set<HexShape> buildPathByMatrix(Map<HexShape, Map<HexShape, Integer>> matrix) {
+        List<HexShape> targetHexesList = new ArrayList<>(matrix.keySet());
         Set<HexShape> path = new LinkedHashSet<>();
-        path.add(begin);
-//        Map<HexShape, Set<HexShape>> checkedHexes = new LinkedHashMap<>();
-//        hexagon.forEach(hex -> checkedHexes.put(hex, new HashSet<>()));
 
-//        HexShape tempHex = begin;
-//        HexShape prevHex = null;
-        int tempLength = 0;
-        int shortestPathLength = pathMap.get(end);
+        HexShape currentHex = targetHexesList.get(targetHexesList.size() - 1);
+        int currentValue = matrix.get(currentHex).get(currentHex);
 
-        PrevNextPair pair = new PrevNextPair();
-        PrevNextPair tempPair = pair;
-        pair.setCurrent(begin);
-//        pair.setNextPair(new PrevNextPair(pair.getCurrent()));
-        while (!(tempLength <= shortestPathLength && pair.getCurrent().equals(end))) {
-            Set<HexShape> checkedHexes = pair.getCheckedHexes();
-
-            Optional<HexShape> optionalHex = pair.getCurrent().getConnections().values().stream()
-                    .filter(connectedHex -> !checkedHexes.contains(connectedHex)).findAny();
-
-            if (optionalHex.isPresent()) {
-                HexShape nextHex = optionalHex.get();
-                ;
-//                if (nextHex.equals(prevHex)) {
-//                    checkedVertices.add(nextHex);
-//                    continue;
-//                }
-                if ((tempLength + nextHex.getValue()) > shortestPathLength) {
-                    pair.getCheckedHexes().add(nextHex);
-                } else {
-                    tempLength += nextHex.getValue();
-
-                    pair.setNextPair(new PrevNextPair(pair,nextHex));
-                    pair = pair.getNextPair();
-                    pair.getCheckedHexes().add(pair.getPrevPair().getCurrent());
-//                    checkedHexes.get(pair.getCurrent()).add(pair.getPrevPair().getCurrent());
-//                    prevHex = tempHex;
-//                    tempHex = nextHex;
-//                    path.add(pair.getCurrent());
-                }
-            } else {
-                tempLength -= pair.getCurrent().getValue();
-
-                pair.getPrevPair().getCheckedHexes().add(pair.getCurrent());
-//                checkedHexes.get(pair.getPrevPair().getCurrent()).add(pair.getCurrent());
-//                tempHex = begin;
-//                prevHex = null;
-//                path.remove(pair.getCurrent());
-                pair = pair.getPrevPair();
+        for (int i = targetHexesList.size() - 1; i >= 0; i--) {
+            if (matrix.get(targetHexesList.get(i)).get(currentHex) != currentValue) {
+                path.add(currentHex);
+                currentHex = targetHexesList.get(i + 1);
+                currentValue = matrix.get(targetHexesList.get(i + 1)).get(currentHex);
+                i++;
+            } else if (i == 0) {
+                path.add(currentHex);
             }
         }
 
+        path.add(targetHexesList.get(0));
 
-        while (tempPair.getNextPair() != null){
-            tempPair = tempPair.getNextPair();
-            path.add(tempPair.getCurrent());
-        }
-//        System.out.println(pair.getCurrent());
         return path;
     }
 
-    private static class PrevNextPair{
-        private PrevNextPair prevPair;
-        private HexShape current;
-        private PrevNextPair nextPair;
-        private Set<HexShape> checkedHexes = new HashSet<>();
-
-        public PrevNextPair(){}
-
-        public PrevNextPair(PrevNextPair prevPair,HexShape current) {
-            this.prevPair = prevPair;
-            this.current = current;
-        }
-
-        public PrevNextPair(HexShape prev) {
-            this.current = prev;
-        }
-
-        public Set<HexShape> getCheckedHexes() {
-            return checkedHexes;
-        }
-
-        public PrevNextPair getPrevPair() {
-            return prevPair;
-        }
-
-        public HexShape getCurrent() {
-            return current;
-        }
-
-        public void setCurrent(HexShape current) {
-            this.current = current;
-        }
-
-        public PrevNextPair getNextPair() {
-            return nextPair;
-        }
-
-        public void setNextPair(PrevNextPair nextPair) {
-            this.nextPair = nextPair;
-        }
+    public Set<HexShape> seekPath(Set<HexShape> hexagon, HexShape begin, HexShape end) {
+        return buildPathByMatrix(buildShortestPathMatrix(hexagon, begin, end));
     }
 
     private Map<HexShape, Integer> initPathMap(Set<HexShape> hexagon, HexShape begin) {

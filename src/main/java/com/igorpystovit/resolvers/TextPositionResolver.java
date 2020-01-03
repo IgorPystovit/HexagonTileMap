@@ -12,14 +12,14 @@ import java.util.List;
 
 public class TextPositionResolver {
 
-    public List<Text> resolveTextPositions(Collection<HexShape> shapes){
+    public List<Text> resolveTextPositions(Collection<HexShape> shapes) {
         List<Text> texts = new ArrayList<>();
 
-        for (HexShape tempShape : shapes){
+        for (HexShape tempShape : shapes) {
             Pair centerPair = calculateTextCenter(tempShape);
             Text text = new Text();
             text.setFill(Color.BLACK);
-            text.setFont(Font.font("Times New Roman",HexShape.SPOT_SIZE - (HexShape.SPOT_SIZE / 2.0)));
+            text.setFont(Font.font("Times New Roman", HexShape.SPOT_SIZE - (HexShape.SPOT_SIZE / 2.0)));
             text.setText(String.valueOf(tempShape.getValue()));
             text.setX(centerPair.getX() - ((text.getText().length() - 1) * 6));
             text.setY(centerPair.getY());
@@ -28,12 +28,12 @@ public class TextPositionResolver {
         return texts;
     }
 
-    private Pair calculateTextCenter(HexShape shape){
+    private Pair calculateTextCenter(HexShape shape) {
         Pair thirdPoint = shape.getCoordinateMap().get(3);
         Pair sixthPoint = shape.getCoordinateMap().get(6);
 
         return new Pair(
-                (sixthPoint.getX() + (thirdPoint.getX() - sixthPoint.getX()) / 2)-(HexShape.SPOT_SIZE / 10.0),
-                thirdPoint.getY()+(HexShape.SPOT_SIZE / 5.0));
+                (sixthPoint.getX() + (thirdPoint.getX() - sixthPoint.getX()) / 2) - (HexShape.SPOT_SIZE / 10.0),
+                thirdPoint.getY() + (HexShape.SPOT_SIZE / 5.0));
     }
 }
