@@ -74,7 +74,7 @@ public class HexagonTileMapGenerator {
     }
 
     private int generateValue(){
-        return random.nextInt(99) + 1;
+        return random.nextInt(25) + 10;
     }
 
     private Pair getScreenCenterPair(){

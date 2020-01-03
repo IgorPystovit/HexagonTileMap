@@ -3,7 +3,9 @@ package com.igorpystovit;
 import com.igorpystovit.resolvers.InitPointPositionResolver;
 import com.igorpystovit.resolvers.TextPositionResolver;
 import com.igorpystovit.util.Pair;
-import javafx.animation.*;
+import javafx.animation.Animation;
+import javafx.animation.FillTransition;
+import javafx.animation.StrokeTransition;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
@@ -18,7 +20,8 @@ import java.util.*;
 
 public class Application extends javafx.application.Application {
     private InitPointPositionResolver positionResolver = new InitPointPositionResolver();
-    private HexShape HEX;
+    private List<HexShape> beginEndList = new ArrayList<>();
+    private Set<HexShape> hexagon;
 
     public static void main(String[] args) {
         launch(args);
@@ -28,8 +31,9 @@ public class Application extends javafx.application.Application {
     @Override
     public void start(Stage primaryStage) {
 
-        Set<HexShape> hexagon = new HexagonTileMapGenerator().generate(100,1600,1000);
-
+        hexagon = new HexagonTileMapGenerator().generate(100,1600,800);
+//          hexagon = HardcodedHexagons.getHexagon();
+//          resolveInitPairs(hexagon);
 //        Set<HexShape> hexagon = HardcodedHexagonMap.getHexagonMap();
 
 //        hexagon.forEach(h -> System.out.println(h.getNearShapes().size()));
@@ -62,13 +66,15 @@ public class Application extends javafx.application.Application {
         primaryStage.show();
     }
 
+
     private Button getGenerateButton(Stage stage){
         Button button = new Button("Generate");
         button.setPrefSize(100,20);
         button.setLayoutX(1700);
         button.setLayoutY(400);
         button.setOnMouseClicked(mouseClicked -> {
-            Set<HexShape> hexagon = new HexagonTileMapGenerator().generate(100,1600,1000);
+            beginEndList = new ArrayList<>();
+            hexagon = new HexagonTileMapGenerator().generate(100,1600,1000);
             List<Polygon> hexagons = createHexagons(hexagon);
             List<Text> texts = resolveTextPositions(hexagon);
 
@@ -129,20 +135,20 @@ public class Application extends javafx.application.Application {
             polygon.setFill(Color.valueOf("#ab8c1c"));
 
             polygon.setOnMouseClicked(mouseEvent -> {
+                beginEndList.add(tempShape);
+                if (beginEndList.size() == 2){
+                    PathSeeker pathSeeker = new PathSeeker();
+                    System.out.println(pathSeeker.seekShortestPath(hexagon, beginEndList.get(0),beginEndList.get(1)).get(beginEndList.get(1)));
+                    pathSeeker.seekPath(hexagon, beginEndList.get(0),beginEndList.get(1)).forEach(hexShape -> System.out.print(hexShape.getValue()+" - "));
+                    beginEndList.clear();
+                }
+
                 FillTransition fillTransition = new FillTransition(Duration.millis(800),polygon);
                 fillTransition.setFromValue(Color.valueOf(polygon.getFill().toString()));
                 fillTransition.setToValue(Color.WHITE);
                 fillTransition.setAutoReverse(true);
                 fillTransition.setCycleCount(Animation.INDEFINITE);
                 fillTransition.play();
-                HEX = tempShape;
-                System.out.println(HEX);
-                Timeline tl = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
-                }));
-
-                tl.setCycleCount(Timeline.INDEFINITE);
-                tl.play();
-
             });
             polygons.add(polygon);
         }
