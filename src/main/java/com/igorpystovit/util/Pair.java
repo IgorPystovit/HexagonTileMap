@@ -1,15 +1,13 @@
 package com.igorpystovit.util;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
+@AllArgsConstructor
 @Getter
 @Setter
-@AllArgsConstructor
 @ToString
-public class Pair {
-    private double x;
-    private double y;
+@NoArgsConstructor
+public class Pair<T> {
+    private T left;
+    private T right;
 }

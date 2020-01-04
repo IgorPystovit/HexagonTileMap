@@ -10,14 +10,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apidesign.canvas</groupId>
-            <artifactId>javafx-canvas</artifactId>
-            <version>0.5.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.10</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
         </dependency>
     </dependencies>
 

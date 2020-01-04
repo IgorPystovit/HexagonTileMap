@@ -1,65 +1,69 @@
 package com.igorpystovit;
 
-import com.igorpystovit.resolvers.InitPointPositionResolver;
+import com.igorpystovit.resolvers.impl.InitPointPositionResolverImpl;
 import com.igorpystovit.util.Pair;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 public class HexagonTileMapGenerator {
     private Random random = new Random();
-    private InitPointPositionResolver positionResolver = new InitPointPositionResolver();
+    private InitPointPositionResolverImpl positionResolver = new InitPointPositionResolverImpl();
+    private HexPositionValidator positionValidator = new HexPositionValidator();
+    private HexagonService hexagonService = new HexagonServiceImpl();
 
     public Set<HexShape> generate(int mapSize, int width, int height) {
-        Set<HexShape> hexes = new LinkedHashSet<>();
         Set<HexShape> checkedHexes = new HashSet<>();
 
-        HexShape rootHex = new HexShape(getScreenCenterPair());
+        HexShape rootHex = new HexShape(getScreenCenterPair().getLeft(),getScreenCenterPair().getRight() - 300);
         rootHex.setRoot(true);
         rootHex.setValue(generateValue());
-        hexes.add(rootHex);
+        hexagonService.addRootHex(rootHex);
 
         HexShape randomUncheckedHex;
 
-        while (hexes.size() < mapSize) {
-            randomUncheckedHex = getRandomHex(hexes, checkedHexes);
-            if (addConnections(randomUncheckedHex, hexes, mapSize, width, height)) {
+        while (hexagonService.getHexagonSize() < mapSize) {
+            randomUncheckedHex = getRandomHex(hexagonService.getHexagon(), checkedHexes);
+            if (generateConnections(randomUncheckedHex, mapSize, width, height)) {
                 checkedHexes.add(randomUncheckedHex);
             }
         }
-        return hexes;
+        return hexagonService.getHexagon();
     }
 
     /**
      * @return true if at least some of connections were added
      * false if no new connections were added
      */
-    private boolean addConnections(HexShape hexShape, Set<HexShape> hexes, int mapSize, int width, int height) {
-        int numberOfConnections = Math.abs(hexShape.getConnections().size() - 6);
+    private boolean generateConnections(HexShape hexShape, int mapSize, int width, int height) {
         boolean connectionAdded = false;
 
-        if (numberOfConnections > 0) {
-            HexShape tempHex;
+        if (hexShape.getConnections().size() < 6){
+            List<Integer> availablePositions = hexShape.getAvailablePositions();
+            for (Integer position : availablePositions){
+                HexShape tempHex;
 
-            int connectionCounter = 0;
-
-            while ((connectionCounter < numberOfConnections) && (hexes.size() < mapSize)) {
                 tempHex = new HexShape(generateValue());
-                hexShape.addConnection(tempHex);
-                positionResolver.resolveConnectionsInitPoints(hexShape);
-                if (positioningCriteriaMet(tempHex, width, height)) {
-                    connectionCounter++;
-                    hexes.add(tempHex);
+
+                tempHex.setInitPair(positionResolver.resolveConnectionInitPoint(position,hexShape));
+
+                if (positionValidator.isScreenPositionValid(tempHex, width, height)) {
+                    hexagonService.addHexAtPosition(position,hexShape,tempHex);
                     connectionAdded = true;
                 } else {
-                    hexShape.removeConnection(tempHex);
                     return connectionAdded;
                 }
+
+                if (hexagonService.getHexagonSize() >= mapSize){
+                    break;
+                }
             }
+
         }
+
         return connectionAdded;
     }
 
@@ -76,28 +80,8 @@ public class HexagonTileMapGenerator {
         return random.nextInt(99) + 1;
     }
 
-    private Pair getScreenCenterPair() {
+    private Pair<Double> getScreenCenterPair() {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-        return new Pair(dimension.width / 2.0, dimension.getHeight() / 2.0);
+        return new Pair<>(dimension.width / 2.0, dimension.getHeight() / 2.0);
     }
-
-    private boolean positioningCriteriaMet(HexShape hexShape, int width, int height) {
-        boolean yAxisCriteriaMet = false;
-        boolean xAxisCriteriaMet = false;
-
-        if (hexShape.containsInitPair()) {
-            yAxisCriteriaMet = hexShape.getCoordinateMap().values()
-                    .stream()
-                    .mapToDouble(Pair::getY)
-                    .noneMatch(y -> (y <= 0) || (y >= height));
-
-            xAxisCriteriaMet = hexShape.getCoordinateMap().values()
-                    .stream()
-                    .mapToDouble(Pair::getX)
-                    .noneMatch(x -> (x <= 0) || (x >= width));
-        }
-
-        return yAxisCriteriaMet && xAxisCriteriaMet;
-    }
-
 }

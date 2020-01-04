@@ -1,10 +1,12 @@
 package com.igorpystovit;
 
-import com.igorpystovit.view.HexagonView;
+import com.igorpystovit.view.HexagonViewImpl;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Set;
 
+@Slf4j
 public class Application extends javafx.application.Application {
     private Set<HexShape> hexagon;
 
@@ -18,6 +20,6 @@ public class Application extends javafx.application.Application {
     @Override
     public void start(Stage primaryStage) {
         hexagon = new HexagonTileMapGenerator().generate(100, WIDTH, HEIGHT);
-        new HexagonView(hexagon).launchView(primaryStage);
+        new HexagonViewImpl(hexagon).launchView(primaryStage);
     }
 }

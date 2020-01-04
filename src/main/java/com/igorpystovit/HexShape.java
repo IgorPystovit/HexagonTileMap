@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @NoArgsConstructor
 @Getter
@@ -15,8 +17,9 @@ public class HexShape {
     //spot size in px
     public static final int SPOT_SIZE = 50;
     //map of coordinates for shape to store its position
-    private Map<Integer, Pair> coordinateMap = new TreeMap<>();
-    private Map<Integer, HexShape> connections = new TreeMap<>();
+    private UUID uuid = UUID.randomUUID();
+    private Map<Integer, Pair<Double>> coordinateMap = new LinkedHashMap<>();
+    private Map<Integer, HexShape> connections = new LinkedHashMap<>();
     private int value;
     private boolean root;
 
@@ -25,39 +28,39 @@ public class HexShape {
     }
 
     public HexShape(double initX, double initY) {
-        setInitPair(new Pair(initX, initY));
+        setInitPair(new Pair<>(initX, initY));
         initCoordinateMap();
     }
 
 
     public HexShape(double initX, double initY, int value) {
-        setInitPair(new Pair(initX, initY));
+        setInitPair(new Pair<>(initX, initY));
         initCoordinateMap();
         this.value = value;
     }
 
-    public HexShape(Pair pair) {
+    public HexShape(Pair<Double> pair) {
         setInitPair(pair);
         initCoordinateMap();
     }
 
     private void initCoordinateMap() {
         if (coordinateMap.get(1) != null) {
-            double initX = coordinateMap.get(1).getX();
-            double initY = coordinateMap.get(1).getY();
+            double initX = coordinateMap.get(1).getLeft();
+            double initY = coordinateMap.get(1).getRight();
 
-            coordinateMap.put(2, new Pair(initX + SPOT_SIZE, initY));
-            coordinateMap.put(3, new Pair(initX + SPOT_SIZE + (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
-            coordinateMap.put(4, new Pair(initX + SPOT_SIZE, initY + (SPOT_SIZE * 2)));
-            coordinateMap.put(5, new Pair(initX, initY + (SPOT_SIZE * 2)));
-            coordinateMap.put(6, new Pair(initX - (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
+            coordinateMap.put(2, new Pair<>(initX + SPOT_SIZE, initY));
+            coordinateMap.put(3, new Pair<>(initX + SPOT_SIZE + (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
+            coordinateMap.put(4, new Pair<>(initX + SPOT_SIZE, initY + (SPOT_SIZE * 2)));
+            coordinateMap.put(5, new Pair<>(initX, initY + (SPOT_SIZE * 2)));
+            coordinateMap.put(6, new Pair<>(initX - (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
         } else {
             System.out.println("Cannot initialize coordinate map");
             throw new NoSuchElementException();
         }
     }
 
-    public Map<Integer, Pair> getCoordinateMap() {
+    public Map<Integer, Pair<Double>> getCoordinateMap() {
         if (mapIsFullyInitialized()) {
             return coordinateMap;
         } else if (!mapIsFullyInitialized() && containsInitPair()) {
@@ -73,12 +76,12 @@ public class HexShape {
         return coordinateMap.size() >= 6;
     }
 
-    public void setInitPair(Pair initPair) {
+    public void setInitPair(Pair<Double> initPair) {
         coordinateMap.put(1, initPair);
         initCoordinateMap();
     }
 
-    public Pair getInitPair() {
+    public Pair<Double> getInitPair() {
         return coordinateMap.get(1);
     }
 
@@ -86,103 +89,29 @@ public class HexShape {
         return getInitPair() != null;
     }
 
+    public List<Integer> getAvailablePositions(){
+        if (connections.size() < 6){
+            return Stream.of(1,2,3,4,5,6)
+                    .filter(position -> !connections.containsKey(position))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
 
-    //TODO create service with crud methods
-    public void removeConnection(HexShape shape) {
-        if (this.connections.containsValue(shape)) {
-            int position = connections.entrySet()
+    public Optional<Integer> getPositionOfConnection(HexShape hex){
+
+        if (this.connections.containsValue(hex)){
+            return this.connections.entrySet()
                     .stream()
-                    .filter(connectionEntry -> connectionEntry.getValue().equals(shape))
-                    .findAny()
-                    .orElseThrow(NoSuchElementException::new)
-                    .getKey();
-            remove(position);
-            new LinkedHashSet<>(shape.connections.keySet()).forEach(shape::remove);
+                    .filter(entry -> entry.getValue().equals(hex))
+                    .map(Map.Entry::getKey)
+                    .findAny();
         }
+        return Optional.empty();
     }
 
-    public void removeByPosition(int position) {
-        if (this.connections.containsKey(position)) {
-            HexShape shape = this.connections.get(position);
-            remove(position);
-            new HashSet<>(shape.connections.keySet()).forEach(shape::remove);
-        }
-    }
-
-    private void remove(int position) {
-        if (this.connections.containsKey(position)) {
-            HexShape shapeToRemove = this.connections.get(position);
-            this.connections.remove(position);
-            shapeToRemove.getConnections().remove(optimizePosition(position + 3));
-        }
-    }
-
-    public void addConnection(HexShape shape) {
-        if ((connections.size() < 6) && (!connections.containsValue(shape))) {
-            for (int i = 1; i <= 6; i++) {
-                if (connections.get(i) == null) {
-                    link(i, shape);
-                    formRingOfDependencies(i).forEach(shape::link);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void link(int position, HexShape hexShape) {
-        int mirrorPosition = optimizePosition(position + 3);
-        if (!this.isDependencyPresent(position)) {
-            this.connections.put(position, hexShape);
-            hexShape.link(mirrorPosition, this);
-        }
-    }
-
-
-    private boolean isDependencyPresent(int position) {
+    public boolean isConnectionPresent(int position) {
         return connections.get(position) != null;
-    }
-
-    private Map<Integer, HexShape> formRingOfDependencies(int position) {
-        Map<Integer, HexShape> ringOfDependencies = new TreeMap<>();
-
-
-        int tempPosition = optimizePosition(position - 1);
-        HexShape tempHexShapeDependency = this.connections.get(tempPosition);
-
-
-        for (int t = 0; t < 2; t++) {
-
-            if (tempHexShapeDependency != null) {
-                //do six iterations because ring consists of no more than six hexes
-                for (int i = 0; i < 6; i++) {
-
-                    if (tempHexShapeDependency == null) {
-                        continue;
-                    }
-
-                    if (t == 0) {
-                        ringOfDependencies.putIfAbsent(optimizePosition(tempPosition - 1), tempHexShapeDependency);
-                        tempPosition = optimizePosition(tempPosition + 1);
-                    } else {
-                        ringOfDependencies.putIfAbsent(optimizePosition(tempPosition + 1), tempHexShapeDependency);
-                        tempPosition = optimizePosition(tempPosition - 1);
-                    }
-                    tempHexShapeDependency = tempHexShapeDependency.connections.get(tempPosition);
-                }
-            }
-            tempPosition = optimizePosition(position + 1);
-            tempHexShapeDependency = this.connections.get(tempPosition);
-        }
-        return ringOfDependencies;
-    }
-
-    public static int optimizePosition(int position) {
-        if (position > 6) {
-            position -= 6;
-        } else if (position <= 0) {
-            position = 6;
-        }
-        return position;
     }
 
     @Override
