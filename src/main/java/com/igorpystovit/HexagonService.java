@@ -1,7 +1,6 @@
 package com.igorpystovit;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public interface HexagonService {
@@ -19,7 +18,9 @@ public interface HexagonService {
 
     int getHexagonSize();
 
-    Set<HexShape> getHexagon();
+    Hexagon getManagedHexagon();
+
+    void setManagedHexagon(Hexagon hexagon);
 
     static int optimizePosition(int position) {
         if (position > 6) {

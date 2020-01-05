@@ -1,39 +1,49 @@
 package com.igorpystovit;
 
+import com.igorpystovit.resolvers.InitPointPositionResolver;
+import com.igorpystovit.resolvers.impl.InitPointPositionResolverImpl;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Slf4j
 public class HexagonServiceImpl implements HexagonService{
-    private Set<HexShape> hexagon;
+    private Hexagon managedHexagon;
     private HexShape rootHex;
+    private InitPointPositionResolver positionResolver = new InitPointPositionResolverImpl();
 
     public HexagonServiceImpl(){
-        hexagon = new LinkedHashSet<>();
+        managedHexagon = new Hexagon();
+    }
+
+    public HexagonServiceImpl(Hexagon managedHexagon) {
+        this.managedHexagon = managedHexagon;
     }
 
     @Override
     public void addRootHex(HexShape rootHex) {
         if (rootHex.isRoot()){
             this.rootHex = rootHex;
-            hexagon.add(rootHex);
-            hexagon.addAll(rootHex.getConnections().values());
+            managedHexagon.getHexes().add(rootHex);
+            managedHexagon.getHexes().addAll(rootHex.getConnections().values());
         }
     }
 
     @Override
     public void addHex(HexShape containedHex, HexShape newHex) {
         if (rootHex != null){
-            if (hexagon.contains(containedHex) &&
-                    !hexagon.contains(newHex)){
+            if (managedHexagon.getHexes().contains(containedHex) &&
+                    !managedHexagon.getHexes().contains(newHex)){
                 newHex.getConnections().clear();
                 addConnection(null,containedHex,newHex);
-                hexagon.add(newHex);
+                managedHexagon.getHexes().add(newHex);
             }
             else{
                 log.error("An error occurred while adding new hex");
@@ -47,11 +57,11 @@ public class HexagonServiceImpl implements HexagonService{
     @Override
     public void addHexAtPosition(int position, HexShape containedHex, HexShape newHex) {
         if (rootHex != null) {
-            if (hexagon.contains(containedHex) &&
-                    !hexagon.contains(newHex)){
+            if (managedHexagon.getHexes().contains(containedHex) &&
+                    !managedHexagon.getHexes().contains(newHex)){
                 newHex.getConnections().clear();
                 addConnection(position,containedHex,newHex);
-                hexagon.add(newHex);
+                managedHexagon.getHexes().add(newHex);
             }
             else{
                 log.error("An error occurred while adding new hex");
@@ -71,7 +81,12 @@ public class HexagonServiceImpl implements HexagonService{
                 connectionPosition = parentHex.getAvailablePositions().get(0);
             }
 
-            formRingOfDependencies(connectionPosition,parentHex).forEach((position,hex) -> connectAtPosition(position,childHex,hex));
+            formRingOfDependencies(connectionPosition,parentHex)
+                    .forEach((position,hex) -> connectAtPosition(position,childHex,hex));
+
+            if (!childHex.containsInitPair()){
+                childHex.setInitPair(positionResolver.resolveConnectionInitPoint(connectionPosition,parentHex));
+            }
         }
     }
 
@@ -120,7 +135,7 @@ public class HexagonServiceImpl implements HexagonService{
 
     @Override
     public void removeHex(HexShape hexToRemove) {
-        if (hexagon.contains(hexToRemove)){
+        if (managedHexagon.getHexes().contains(hexToRemove)){
             hexToRemove.getConnections().values().forEach(connection -> removeConnection(hexToRemove,connection));
         }
         else{
@@ -129,27 +144,24 @@ public class HexagonServiceImpl implements HexagonService{
     }
 
     private void removeConnection(HexShape parentHex,HexShape childHex){
-        parentHex.getPositionOfConnection(childHex).ifPresent(position -> parentHex.getConnections().remove(position));
-        removeConnection(childHex,parentHex);
+        if (parentHex.getConnections().containsValue(childHex)){
+            parentHex.getPositionOfConnection(childHex).ifPresent(position -> parentHex.getConnections().remove(position));
+            removeConnection(childHex,parentHex);
+        }
     }
 
     @Override
     public int getHexagonSize() {
-        return hexagon.size();
-    }
-
-    @Override
-    public Set<HexShape> getHexagon(){
-        return Collections.unmodifiableSet(hexagon);
+        return managedHexagon.getHexes().size();
     }
 
     @Override
     public Optional<HexShape> getByUUID(UUID uuid) {
-        return hexagon.stream().filter(hex -> hex.getUuid().equals(uuid)).findAny();
+        return managedHexagon.getHexes().stream().filter(hex -> hex.getUuid().equals(uuid)).findAny();
     }
 
     @Override
     public boolean containsHexByUUID(UUID uuid) {
-        return hexagon.stream().map(HexShape::getUuid).anyMatch(uuid::equals);
+        return managedHexagon.getHexes().stream().map(HexShape::getUuid).anyMatch(uuid::equals);
     }
 }

@@ -5,14 +5,14 @@ import java.util.*;
 public class PathSeeker {
 
     //seek shortest paths using Dijkstra algorithm
-    private Map<HexShape, Map<HexShape, Integer>> buildShortestPathMatrix(Set<HexShape> hexagon, HexShape begin, HexShape end) {
+    private Map<HexShape, Map<HexShape, Integer>> buildShortestPathMatrix(Hexagon hexagon, HexShape begin, HexShape end) {
         Map<HexShape, Integer> pathMap = initPathMap(hexagon, begin);
         Set<HexShape> resolvedHexes = new HashSet<>();
         Map<HexShape, Map<HexShape, Integer>> matrix = new LinkedHashMap<>();
 
         matrix.putIfAbsent(begin, new LinkedHashMap<>(pathMap));
 
-        while (resolvedHexes.size() < hexagon.size()) {
+        while (resolvedHexes.size() < hexagon.getHexes().size()) {
 
             if (resolvedHexes.contains(end)) {
                 return matrix;
@@ -48,6 +48,17 @@ public class PathSeeker {
         return matrix;
     }
 
+    private Map<HexShape, Integer> initPathMap(Hexagon hexagon, HexShape begin) {
+        Map<HexShape, Integer> pathMap = new LinkedHashMap<>();
+        pathMap.putIfAbsent(begin, 0);
+
+        for (HexShape tempHex : hexagon.getHexes()) {
+            pathMap.putIfAbsent(tempHex, Integer.MAX_VALUE);
+        }
+
+        return pathMap;
+    }
+
     private Set<HexShape> buildPathByMatrix(Map<HexShape, Map<HexShape, Integer>> matrix) {
         List<HexShape> targetHexesList = new ArrayList<>(matrix.keySet());
         Set<HexShape> path = new LinkedHashSet<>();
@@ -71,18 +82,8 @@ public class PathSeeker {
         return path;
     }
 
-    public Set<HexShape> seekPath(Set<HexShape> hexagon, HexShape begin, HexShape end) {
+    public Set<HexShape> seekPath(Hexagon hexagon, HexShape begin, HexShape end) {
         return buildPathByMatrix(buildShortestPathMatrix(hexagon, begin, end));
     }
 
-    private Map<HexShape, Integer> initPathMap(Set<HexShape> hexagon, HexShape begin) {
-        Map<HexShape, Integer> pathMap = new LinkedHashMap<>();
-        pathMap.putIfAbsent(begin, 0);
-
-        for (HexShape tempHex : hexagon) {
-            pathMap.putIfAbsent(tempHex, Integer.MAX_VALUE);
-        }
-
-        return pathMap;
-    }
 }

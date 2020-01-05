@@ -1,6 +1,7 @@
 package com.igorpystovit.resolvers.impl;
 
 import com.igorpystovit.HexShape;
+import com.igorpystovit.Hexagon;
 import com.igorpystovit.resolvers.DesignResolver;
 import javafx.animation.Animation;
 import javafx.animation.FillTransition;
@@ -19,13 +20,17 @@ import java.util.*;
 @Setter
 //TODO introduce ability to set styling and to use default if styling is not set
 public class DesignResolverImpl implements DesignResolver {
-    private Set<HexShape> managedHexagon;
+    private Hexagon managedHexagon;
     private Map<HexShape, Polygon> hexPolygonMap;
-    private Set<Transition> activeTransitions;
+    private Set<Transition> activeTransitions = new HashSet<>();
 
-    public DesignResolverImpl(Set<HexShape> managedHexagon) {
+    public DesignResolverImpl(Hexagon managedHexagon) {
         this.managedHexagon = managedHexagon;
-        this.activeTransitions = new HashSet<>();
+        this.hexPolygonMap = initHexPolygonMap(managedHexagon);
+    }
+
+    public DesignResolverImpl(){
+        this.managedHexagon = new Hexagon();
         this.hexPolygonMap = initHexPolygonMap(managedHexagon);
     }
 
@@ -62,15 +67,15 @@ public class DesignResolverImpl implements DesignResolver {
         return hexPolygonMap;
     }
 
-    public void setManagedHexagon(Set<HexShape> managedHexagon) {
+    public void setManagedHexagon(Hexagon managedHexagon) {
         this.managedHexagon = managedHexagon;
         hexPolygonMap = initHexPolygonMap(managedHexagon);
     }
 
-    private Map<HexShape, Polygon> initHexPolygonMap(Collection<HexShape> hexagon) {
+    private Map<HexShape, Polygon> initHexPolygonMap(Hexagon hexagon) {
         Map<HexShape, Polygon> hexPolygonMap = new LinkedHashMap<>();
 
-        for (HexShape tempHex : hexagon) {
+        for (HexShape tempHex : hexagon.getHexes()) {
             Polygon polygon = new Polygon();
             PolygonStyling polygonStyling = getPolygonStyling();
 

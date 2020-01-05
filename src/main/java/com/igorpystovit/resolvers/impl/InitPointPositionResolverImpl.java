@@ -25,18 +25,9 @@ public class InitPointPositionResolverImpl implements InitPointPositionResolver 
     }
 
     public Pair<Double> resolveConnectionInitPoint(int connectionPosition,HexShape parentHex) {
-//        Map<Integer, HexShape> connections = parentHex.getConnections();
-
-//        if (!connections.isEmpty() || (parentHex.isRoot())) {
-//            connections
-//                    .forEach((position, shape) -> {
-//                        if (!shape.containsInitPair()) {
-//                            UnaryOperator<Pair<Double>> strategy = strategyMap.get(position);
-//                            shape.setInitPair(strategy.apply(parentHex.getCoordinateMap().get(position)));
-//                        }
-//                    });
-//        }
-        return getStrategyMap().get(connectionPosition).apply(parentHex.getCoordinateMap().get(connectionPosition));
+        return getStrategyMap()
+                .get(connectionPosition)
+                .apply(parentHex.getCoordinateMap().get(connectionPosition));
     }
 
     private Map<Integer, UnaryOperator<Pair<Double>>> getStrategyMap() {

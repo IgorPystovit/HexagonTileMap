@@ -15,7 +15,8 @@ public class HexagonTileMapGenerator {
     private HexPositionValidator positionValidator = new HexPositionValidator();
     private HexagonService hexagonService = new HexagonServiceImpl();
 
-    public Set<HexShape> generate(int mapSize, int width, int height) {
+    public Hexagon generate(int mapSize, int width, int height) {
+        hexagonService.setManagedHexagon(new Hexagon());
         Set<HexShape> checkedHexes = new HashSet<>();
 
         HexShape rootHex = new HexShape(getScreenCenterPair().getLeft(),getScreenCenterPair().getRight() - 300);
@@ -26,12 +27,12 @@ public class HexagonTileMapGenerator {
         HexShape randomUncheckedHex;
 
         while (hexagonService.getHexagonSize() < mapSize) {
-            randomUncheckedHex = getRandomHex(hexagonService.getHexagon(), checkedHexes);
+            randomUncheckedHex = getRandomHex(hexagonService.getManagedHexagon(), checkedHexes);
             if (generateConnections(randomUncheckedHex, mapSize, width, height)) {
                 checkedHexes.add(randomUncheckedHex);
             }
         }
-        return hexagonService.getHexagon();
+        return hexagonService.getManagedHexagon();
     }
 
     /**
@@ -67,11 +68,11 @@ public class HexagonTileMapGenerator {
         return connectionAdded;
     }
 
-    private HexShape getRandomHex(Set<HexShape> hexes, Set<HexShape> checkedHexes) {
+    private HexShape getRandomHex(Hexagon hexagon, Set<HexShape> checkedHexes) {
         HexShape randomHex;
         do {
-            int hexIndex = random.nextInt(hexes.size());
-            randomHex = (HexShape) hexes.toArray()[hexIndex];
+            int hexIndex = random.nextInt(hexagon.getHexes().size());
+            randomHex = (HexShape) hexagon.getHexes().toArray()[hexIndex];
         } while (checkedHexes.contains(randomHex));
         return randomHex;
     }

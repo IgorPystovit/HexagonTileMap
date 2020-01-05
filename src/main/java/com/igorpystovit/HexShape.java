@@ -120,7 +120,7 @@ public class HexShape {
         sb.append("Value = " + value + "\n");
         sb.append("Dependencies: \n");
         for (Map.Entry<Integer, HexShape> hexShapeEntry : connections.entrySet()) {
-            sb.append(hexShapeEntry.getKey() + " = " + hexShapeEntry.getValue().getValue() + "\n");
+            sb.append(hexShapeEntry.getKey() + " = " + hexShapeEntry.getValue().getUuid() + "\n");
         }
         return sb.toString();
     }

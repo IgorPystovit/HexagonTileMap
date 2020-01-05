@@ -1,15 +1,18 @@
 package com.igorpystovit;
 
-import java.util.Collections;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 
+@Setter
+@Getter
 public class Hexagon {
-    private Set<HexShape> hexagon = new LinkedHashSet<>();
+    private Set<HexShape> hexes;
 
-    public Set<HexShape> getHexagon(){
-        return Collections.unmodifiableSet(hexagon);
+    public Hexagon(){
+        hexes = new LinkedHashSet<>();
     }
-
 }
