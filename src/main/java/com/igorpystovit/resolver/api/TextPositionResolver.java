@@ -1,6 +1,6 @@
-package com.igorpystovit.resolvers;
+package com.igorpystovit.resolver.api;
 
-import com.igorpystovit.HexShape;
+import com.igorpystovit.entity.HexShape;
 import javafx.scene.text.Text;
 
 import java.util.Collection;

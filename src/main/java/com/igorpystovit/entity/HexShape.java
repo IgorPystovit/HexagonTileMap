@@ -1,9 +1,10 @@
-package com.igorpystovit;
+package com.igorpystovit.entity;
 
 import com.igorpystovit.util.Pair;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 @Getter
 @Setter
+@Slf4j
 public class HexShape {
     //init values for other shapes to coordinate themselves
     //spot size in px
@@ -19,7 +21,7 @@ public class HexShape {
     //map of coordinates for shape to store its position
     private UUID uuid = UUID.randomUUID();
     private Map<Integer, Pair<Double>> coordinateMap = new LinkedHashMap<>();
-    private Map<Integer, HexShape> connections = new LinkedHashMap<>();
+    private Map<Integer, UUID> connections = new LinkedHashMap<>();
     private int value;
     private boolean root;
 
@@ -55,7 +57,8 @@ public class HexShape {
             coordinateMap.put(5, new Pair<>(initX, initY + (SPOT_SIZE * 2)));
             coordinateMap.put(6, new Pair<>(initX - (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
         } else {
-            System.out.println("Cannot initialize coordinate map");
+            log.warn("Cannot initialize coordinate map");
+            ;
             throw new NoSuchElementException();
         }
     }
@@ -67,7 +70,8 @@ public class HexShape {
             initCoordinateMap();
             return coordinateMap;
         } else {
-            System.out.println("Map is not fully initialized");
+            log.warn("Map is not fully initialized");
+            ;
             throw new NoSuchElementException();
         }
     }
@@ -89,21 +93,21 @@ public class HexShape {
         return getInitPair() != null;
     }
 
-    public List<Integer> getAvailablePositions(){
-        if (connections.size() < 6){
-            return Stream.of(1,2,3,4,5,6)
+    public List<Integer> getAvailablePositions() {
+        if (connections.size() < 6) {
+            return Stream.of(1, 2, 3, 4, 5, 6)
                     .filter(position -> !connections.containsKey(position))
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
 
-    public Optional<Integer> getPositionOfConnection(HexShape hex){
+    public Optional<Integer> getPositionOfConnection(UUID hexUuid) {
 
-        if (this.connections.containsValue(hex)){
+        if (this.connections.containsValue(hexUuid)) {
             return this.connections.entrySet()
                     .stream()
-                    .filter(entry -> entry.getValue().equals(hex))
+                    .filter(entry -> entry.getValue().equals(hexUuid))
                     .map(Map.Entry::getKey)
                     .findAny();
         }
@@ -119,8 +123,8 @@ public class HexShape {
         StringBuilder sb = new StringBuilder();
         sb.append("Value = " + value + "\n");
         sb.append("Dependencies: \n");
-        for (Map.Entry<Integer, HexShape> hexShapeEntry : connections.entrySet()) {
-            sb.append(hexShapeEntry.getKey() + " = " + hexShapeEntry.getValue().getUuid() + "\n");
+        for (Map.Entry<Integer, UUID> hexShapeEntry : connections.entrySet()) {
+            sb.append(hexShapeEntry.getKey() + " = " + hexShapeEntry.getValue() + "\n");
         }
         return sb.toString();
     }

@@ -1,30 +1,18 @@
-package com.igorpystovit.resolvers.impl;
+package com.igorpystovit.resolver.impl;
 
-import com.igorpystovit.HexShape;
-import com.igorpystovit.resolvers.InitPointPositionResolver;
+import com.igorpystovit.entity.HexShape;
+import com.igorpystovit.resolver.api.InitPointPositionResolver;
 import com.igorpystovit.util.Pair;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
+@Component
 public class InitPointPositionResolverImpl implements InitPointPositionResolver {
-    public void resolveConnectionsInitPoints(HexShape hexShape) {
-        Map<Integer, UnaryOperator<Pair<Double>>> strategyMap = getStrategyMap();
-        Map<Integer, HexShape> connections = hexShape.getConnections();
 
-        if (!connections.isEmpty() || (hexShape.isRoot())) {
-            connections
-                    .forEach((position, shape) -> {
-                        if (!shape.containsInitPair()) {
-                            UnaryOperator<Pair<Double>> strategy = strategyMap.get(position);
-                            shape.setInitPair(strategy.apply(hexShape.getCoordinateMap().get(position)));
-                        }
-                    });
-        }
-    }
-
-    public Pair<Double> resolveConnectionInitPoint(int connectionPosition,HexShape parentHex) {
+    public Pair<Double> resolveConnectionInitPoint(int connectionPosition, HexShape parentHex) {
         return getStrategyMap()
                 .get(connectionPosition)
                 .apply(parentHex.getCoordinateMap().get(connectionPosition));

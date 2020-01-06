@@ -1,53 +1,45 @@
-package com.igorpystovit.resolvers.impl;
+package com.igorpystovit.resolver.impl;
 
-import com.igorpystovit.HexShape;
-import com.igorpystovit.Hexagon;
-import com.igorpystovit.resolvers.DesignResolver;
-import javafx.animation.Animation;
-import javafx.animation.FillTransition;
+import com.igorpystovit.entity.HexShape;
+import com.igorpystovit.entity.Hexagon;
+import com.igorpystovit.resolver.api.DesignResolver;
+import com.igorpystovit.service.api.HexagonService;
 import javafx.animation.Transition;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
-import javafx.util.Duration;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-//@Slf4j
 @Getter
 @Setter
-//TODO introduce ability to set styling and to use default if styling is not set
+@Service
 public class DesignResolverImpl implements DesignResolver {
     private Hexagon managedHexagon;
     private Map<HexShape, Polygon> hexPolygonMap;
     private Set<Transition> activeTransitions = new HashSet<>();
+    private List<HexShape> highlightedHexes = new ArrayList<>();
+    private HexagonService hexagonService;
 
-    public DesignResolverImpl(Hexagon managedHexagon) {
-        this.managedHexagon = managedHexagon;
-        this.hexPolygonMap = initHexPolygonMap(managedHexagon);
-    }
-
-    public DesignResolverImpl(){
+    @Autowired
+    public DesignResolverImpl(HexagonService hexagonService) {
+        this.hexagonService = hexagonService;
         this.managedHexagon = new Hexagon();
         this.hexPolygonMap = initHexPolygonMap(managedHexagon);
     }
 
-    public void playTransitionOn(HexShape hex) {
-        Polygon polygon = hexPolygonMap.get(hex);
-        if (polygon != null) {
-            FillTransition fillTransition = new FillTransition(Duration.millis(800), polygon);
-            fillTransition.setFromValue(Color.valueOf(polygon.getFill().toString()));
-            fillTransition.setToValue(Color.WHITE);
-            fillTransition.setAutoReverse(true);
-            fillTransition.setCycleCount(Animation.INDEFINITE);
-            fillTransition.play();
-            activeTransitions.add(fillTransition);
-        }
-    }
-
-    public void highlightHexes(Collection<HexShape> hexes) {
+    public void highlightHexes(Collection<UUID> uuids) {
+        Set<HexShape> hexes = uuids
+                .stream()
+                .map(hexagonService::getByUUID)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
         hexPolygonMap.entrySet()
                 .stream()
                 .filter(hexPolygonEntry -> hexes.contains(hexPolygonEntry.getKey()))
@@ -69,6 +61,7 @@ public class DesignResolverImpl implements DesignResolver {
 
     public void setManagedHexagon(Hexagon managedHexagon) {
         this.managedHexagon = managedHexagon;
+        hexagonService.setManagedHexagon(managedHexagon);
         hexPolygonMap = initHexPolygonMap(managedHexagon);
     }
 

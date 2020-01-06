@@ -1,17 +1,11 @@
-package com.igorpystovit;
+package com.igorpystovit.validator;
 
+import com.igorpystovit.entity.HexShape;
 import com.igorpystovit.util.Pair;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class HexPositionValidator {
-    private int screenWidth = 1600;
-    private int screenHeight = 800;
-
-    public HexPositionValidator(int screenWidth,int screenHeight){
-        this.screenHeight = screenHeight;
-        this.screenWidth = screenWidth;
-    }
 
     public boolean isScreenPositionValid(HexShape hexShape, int width, int height) {
         boolean yAxisCriteriaMet = false;
@@ -32,4 +26,12 @@ public class HexPositionValidator {
         return yAxisCriteriaMet && xAxisCriteriaMet;
     }
 
+    public static int validatePosition(int position) {
+        if (position > 6) {
+            position -= 6;
+        } else if (position <= 0) {
+            position = 6;
+        }
+        return position;
+    }
 }

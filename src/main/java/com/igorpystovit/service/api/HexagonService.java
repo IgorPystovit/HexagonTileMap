@@ -1,4 +1,7 @@
-package com.igorpystovit;
+package com.igorpystovit.service.api;
+
+import com.igorpystovit.entity.HexShape;
+import com.igorpystovit.entity.Hexagon;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,12 +25,5 @@ public interface HexagonService {
 
     void setManagedHexagon(Hexagon hexagon);
 
-    static int optimizePosition(int position) {
-        if (position > 6) {
-            position -= 6;
-        } else if (position <= 0) {
-            position = 6;
-        }
-        return position;
-    }
+
 }

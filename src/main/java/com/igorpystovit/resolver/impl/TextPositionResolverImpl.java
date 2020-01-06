@@ -1,20 +1,22 @@
-package com.igorpystovit.resolvers.impl;
+package com.igorpystovit.resolver.impl;
 
-import com.igorpystovit.HexShape;
-import com.igorpystovit.resolvers.TextPositionResolver;
+import com.igorpystovit.entity.HexShape;
+import com.igorpystovit.resolver.api.TextPositionResolver;
 import com.igorpystovit.util.Pair;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Component
 public class TextPositionResolverImpl implements TextPositionResolver {
 
     public List<Text> resolveTextPosition(Collection<HexShape> shapes) {
-        List<Text> texts = new ArrayList<>();
+        List<Text> hexValues = new ArrayList<>();
 
         for (HexShape tempShape : shapes) {
             Pair<Double> centerPair = calculateTextCenter(tempShape);
@@ -24,9 +26,9 @@ public class TextPositionResolverImpl implements TextPositionResolver {
             text.setText(String.valueOf(tempShape.getValue()));
             text.setX(centerPair.getLeft() - ((text.getText().length() - 1) * 6));
             text.setY(centerPair.getRight());
-            texts.add(text);
+            hexValues.add(text);
         }
-        return texts;
+        return hexValues;
     }
 
     private Pair<Double> calculateTextCenter(HexShape shape) {
