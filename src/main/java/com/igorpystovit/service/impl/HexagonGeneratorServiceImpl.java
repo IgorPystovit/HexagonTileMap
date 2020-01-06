@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+/**
+ * Service to generate random {@link Hexagon}
+ * */
 @Service
 public class HexagonGeneratorServiceImpl implements HexagonGeneratorService {
     private Random random = new Random();
@@ -30,6 +33,11 @@ public class HexagonGeneratorServiceImpl implements HexagonGeneratorService {
         this.positionValidator = new HexPositionValidator();
     }
 
+    /**
+     * @param size size of hexagon
+     * @param width of the frame for generated {@link Hexagon}
+     * @param height of the frame for generated {@link Hexagon}
+     * */
     @Override
     public Hexagon generate(int size, int width, int height) {
 
@@ -62,8 +70,9 @@ public class HexagonGeneratorServiceImpl implements HexagonGeneratorService {
     }
 
     /**
+     * @param hexShape parent hex to add connections to
      * @return true if at least some of connections were added
-     * false if no new connections were added
+     * @return false if no new connections were added
      */
     private boolean generateConnections(HexShape hexShape, int mapSize, int width, int height) {
         boolean connectionAdded = false;

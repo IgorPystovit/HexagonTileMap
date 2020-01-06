@@ -4,7 +4,6 @@ import com.igorpystovit.entity.HexShape;
 import com.igorpystovit.entity.Hexagon;
 import com.igorpystovit.resolver.api.DesignResolver;
 import com.igorpystovit.service.api.HexagonService;
-import javafx.animation.Transition;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import lombok.AllArgsConstructor;
@@ -16,14 +15,16 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Resolver that manages {@link HexShape} as {@link Polygon}
+ * It also contains methods to change the state of certain {@link Polygon} by {@link HexShape} UUID
+ * */
 @Getter
 @Setter
 @Service
 public class DesignResolverImpl implements DesignResolver {
     private Hexagon managedHexagon;
     private Map<HexShape, Polygon> hexPolygonMap;
-    private Set<Transition> activeTransitions = new HashSet<>();
-    private List<HexShape> highlightedHexes = new ArrayList<>();
     private HexagonService hexagonService;
 
     @Autowired
@@ -47,8 +48,6 @@ public class DesignResolverImpl implements DesignResolver {
     }
 
     public void resetToDefault() {
-        activeTransitions.forEach(Transition::stop);
-        activeTransitions.clear();
         hexPolygonMap.values().forEach(this::setDefaultStyling);
     }
 

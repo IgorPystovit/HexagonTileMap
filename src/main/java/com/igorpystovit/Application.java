@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
+/**
+ * Entry point of the application
+ * */
 @Slf4j
 @ComponentScan
 public class Application extends javafx.application.Application {

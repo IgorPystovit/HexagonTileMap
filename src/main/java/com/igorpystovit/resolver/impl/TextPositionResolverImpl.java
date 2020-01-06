@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Resolver that provides creation and right placing for {@link HexShape} value
+ * */
 @Component
 public class TextPositionResolverImpl implements TextPositionResolver {
 

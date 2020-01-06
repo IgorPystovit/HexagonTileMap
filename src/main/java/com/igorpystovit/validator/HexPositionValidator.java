@@ -4,6 +4,12 @@ import com.igorpystovit.entity.HexShape;
 import com.igorpystovit.util.Pair;
 import lombok.NoArgsConstructor;
 
+/**
+ * Position validator that ensures that {@link HexShape} is placed correctly
+ *
+ * It also contains static method to validate the position in order to provide clockwise movement
+ * when working with positions in {@link HexShape}
+ * */
 @NoArgsConstructor
 public class HexPositionValidator {
 

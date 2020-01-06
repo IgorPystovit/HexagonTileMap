@@ -9,6 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
+/**
+ * Resolver that provides right placing for {@link HexShape} init point
+ * regarding the position of parent hex
+ *
+ * For such calculation it uses strategy map
+ * that contains certain strategy for certain child hex position
+ *
+ * */
 @Component
 public class InitPointPositionResolverImpl implements InitPointPositionResolver {
 

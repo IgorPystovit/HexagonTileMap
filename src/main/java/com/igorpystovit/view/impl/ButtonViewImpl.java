@@ -23,6 +23,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Button storage that describes all of the buttons present on the main {@link Stage}
+ * their state and behaviour
+ * */
 @Service
 public class ButtonViewImpl implements ButtonView {
     private HexagonGeneratorService hexagonGenerator;

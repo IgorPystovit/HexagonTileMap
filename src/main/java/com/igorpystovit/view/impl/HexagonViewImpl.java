@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Basic view that manages the internal state all of the elements of {@link Stage}
+ * */
 @Getter
 @Setter
 @Slf4j

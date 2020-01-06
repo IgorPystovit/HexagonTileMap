@@ -10,15 +10,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * HexShape entity
+ *
+ * All of the coordinates of HexShape are represented by {@link Pair<Double>}
+ * that contains x and y coordinates
+ *
+ * It can resolve its placing coordinates only if its init point is initialized
+ * The init point of {@link HexShape} is the one that is placed in left corner of the top
+ * */
 @NoArgsConstructor
 @Getter
 @Setter
 @Slf4j
 public class HexShape {
-    //init values for other shapes to coordinate themselves
-    //spot size in px
     public static final int SPOT_SIZE = 50;
-    //map of coordinates for shape to store its position
     private UUID uuid = UUID.randomUUID();
     private Map<Integer, Pair<Double>> coordinateMap = new LinkedHashMap<>();
     private Map<Integer, UUID> connections = new LinkedHashMap<>();
@@ -58,7 +64,6 @@ public class HexShape {
             coordinateMap.put(6, new Pair<>(initX - (SPOT_SIZE / 2.0), initY + SPOT_SIZE));
         } else {
             log.warn("Cannot initialize coordinate map");
-            ;
             throw new NoSuchElementException();
         }
     }
@@ -71,7 +76,6 @@ public class HexShape {
             return coordinateMap;
         } else {
             log.warn("Map is not fully initialized");
-            ;
             throw new NoSuchElementException();
         }
     }
@@ -116,17 +120,6 @@ public class HexShape {
 
     public boolean isConnectionPresent(int position) {
         return connections.get(position) != null;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Value = " + value + "\n");
-        sb.append("Dependencies: \n");
-        for (Map.Entry<Integer, UUID> hexShapeEntry : connections.entrySet()) {
-            sb.append(hexShapeEntry.getKey() + " = " + hexShapeEntry.getValue() + "\n");
-        }
-        return sb.toString();
     }
 
 }

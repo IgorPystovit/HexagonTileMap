@@ -15,8 +15,4 @@ public enum HexagonEventType {
     public EventType<?> getEventType() {
         return eventType;
     }
-
-    public void setEventType(EventType<?> eventType) {
-        this.eventType = eventType;
-    }
 }

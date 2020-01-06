@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service to work with {@link Hexagon}
+ *
+ * All of the add and remove interactions with hexagon should be performed using that class
+ * */
 @Getter
 @Setter
 @Slf4j
@@ -82,7 +87,7 @@ public class HexagonServiceImpl implements HexagonService {
                 connectionPosition = parentHex.getAvailablePositions().get(0);
             }
 
-            formRingOfDependencies(connectionPosition, parentHex)
+            buildRingOfConnections(connectionPosition, parentHex)
                     .forEach((position, hex) -> connectAtPosition(position, childHex, hex));
 
             if (!childHex.containsInitPair()) {
@@ -99,7 +104,12 @@ public class HexagonServiceImpl implements HexagonService {
         }
     }
 
-    private Map<Integer, HexShape> formRingOfDependencies(int position, HexShape parentHex) {
+    /**
+     * Method to build ring of connections for certain position of child hex
+     *
+     * @return map of connections and their positions that should be added to child hex
+     * */
+    private Map<Integer, HexShape> buildRingOfConnections(int position, HexShape parentHex) {
         Map<Integer, HexShape> ringOfDependencies = new TreeMap<>();
 
         ringOfDependencies.putIfAbsent(HexPositionValidator.validatePosition(position + 3), parentHex);
@@ -150,7 +160,7 @@ public class HexagonServiceImpl implements HexagonService {
                     .map(Optional::get)
                     .forEach(connection -> removeConnection(hexToRemove, connection));
         } else {
-            log.warn("Hex is not contained on hexagon! Cannot perform remove operation");
+            log.warn("Hex is not contained in hexagon! Cannot perform remove operation");
         }
     }
 

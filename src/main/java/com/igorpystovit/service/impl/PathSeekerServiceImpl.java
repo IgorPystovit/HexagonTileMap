@@ -9,6 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Service to seek shortest path between two {@link HexShape}s
+ *
+ * It builds matrix of the shortest paths regarding begin {@link HexShape} using Dijkstra algorithm
+ * and then walks through that matrix in reverse order building path to end {@link HexShape}
+ *  */
 @Service
 public class PathSeekerServiceImpl implements PathSeekerService {
 
@@ -46,7 +52,11 @@ public class PathSeekerServiceImpl implements PathSeekerService {
         return path;
     }
 
-    //seek shortest paths using Dijkstra algorithm
+
+    /**
+     * Build matrix of the shortest paths regarding begin {@link HexShape} using Dijkstra algorithm
+     * until matrix contains end {@link HexShape}
+     */
     private Map<HexShape, Map<HexShape, Integer>> buildShortestPathMatrix(Hexagon hexagon, UUID beginUuid, UUID endUuid) {
         hexagonService.setManagedHexagon(hexagon);
         HexShape begin = hexagonService.getByUUID(beginUuid).orElseThrow(NoSuchElementException::new);
@@ -60,7 +70,7 @@ public class PathSeekerServiceImpl implements PathSeekerService {
         while (resolvedHexes.size() < hexagon.getHexes().size()) {
 
             if (resolvedHexes.contains(end)) {
-                return matrix;
+                break;
             }
 
             int minPath = pathMap
@@ -97,6 +107,7 @@ public class PathSeekerServiceImpl implements PathSeekerService {
                 matrix.put(targetHex, new LinkedHashMap<>(pathMap));
             }
         }
+
         return matrix;
     }
 
