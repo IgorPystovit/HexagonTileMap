@@ -77,7 +77,7 @@ public class HexagonViewImpl implements HexagonView {
         root.getChildren().addAll(texts);
         root.getChildren().addAll(buttonView.getGenerateButtonAndTextField(stage));
         root.getChildren().addAll(buttonView.getImportButtonAndTextField(stage));
-        root.getChildren().addAll(buttonView.getExportTextFieldAndButton(stage));
+        root.getChildren().addAll(buttonView.getExportButtonAndTextField(stage));
         scene.setRoot(root);
         stage.setScene(scene);
         stage.show();

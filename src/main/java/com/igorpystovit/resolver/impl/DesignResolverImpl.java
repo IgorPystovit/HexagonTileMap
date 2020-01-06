@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * */
 @Getter
 @Setter
-@Service
+@Component
 public class DesignResolverImpl implements DesignResolver {
     private Hexagon managedHexagon;
     private Map<HexShape, Polygon> hexPolygonMap;

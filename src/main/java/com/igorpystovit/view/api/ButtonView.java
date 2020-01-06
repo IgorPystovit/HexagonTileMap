@@ -10,5 +10,5 @@ public interface ButtonView {
 
     List<Node> getImportButtonAndTextField(Stage stage);
 
-    List<Node> getExportTextFieldAndButton(Stage stage);
+    List<Node> getExportButtonAndTextField(Stage stage);
 }

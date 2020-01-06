@@ -135,7 +135,7 @@ public class ButtonViewImpl implements ButtonView {
         return importTextField;
     }
 
-    public List<Node> getExportTextFieldAndButton(Stage stage) {
+    public List<Node> getExportButtonAndTextField(Stage stage) {
         List<Node> textFieldButton = new ArrayList<>();
 
         Button exportButton = new Button("Export");
@@ -159,15 +159,15 @@ public class ButtonViewImpl implements ButtonView {
         return textFieldButton;
     }
 
-    private TextField getExportTextField(Button importButton) {
+    private TextField getExportTextField(Button exportButton) {
         TextField exportTextField = new TextField();
 
-        exportTextField.setLayoutY(importButton.getLayoutY() - 50);
-        exportTextField.setLayoutX(importButton.getLayoutX() - 20);
+        exportTextField.setLayoutY(exportButton.getLayoutY() - 50);
+        exportTextField.setLayoutX(exportButton.getLayoutX() - 20);
 
         exportTextField.setPrefSize(
-                importButton.getPrefWidth() + 40,
-                importButton.getPrefHeight() + 10);
+                exportButton.getPrefWidth() + 40,
+                exportButton.getPrefHeight() + 10);
         exportTextField.setPromptText("Export file path");
         return exportTextField;
     }
