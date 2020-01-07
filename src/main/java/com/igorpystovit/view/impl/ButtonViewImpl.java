@@ -103,13 +103,12 @@ public class ButtonViewImpl implements ButtonView {
             try {
                 Hexagon deserializedHexagon = HexagonDtoConverter
                         .convertFromDto(objectUnmarshallerService.fromJson(new File(importTextField.getText()), HexagonDto.class));
-
-                Pair<HexShape> beginEndPair = deserializedHexagon.getShortestPaths().keySet().iterator().next();
-
                 hexagonView.drawHexagon(stage, deserializedHexagon);
-                stage.fireEvent(new HexagonEvent<>(HexagonEventType.BEGIN_CLICKED.getEventType(), beginEndPair.getLeft()));
-                stage.fireEvent(new HexagonEvent<>(HexagonEventType.END_CLICKED.getEventType(), beginEndPair.getRight()));
-
+                if (deserializedHexagon.getShortestPaths().size() > 0) {
+                    Pair<HexShape> beginEndPair = deserializedHexagon.getShortestPaths().keySet().iterator().next();
+                    stage.fireEvent(new HexagonEvent<>(HexagonEventType.BEGIN_CLICKED.getEventType(), beginEndPair.getLeft()));
+                    stage.fireEvent(new HexagonEvent<>(HexagonEventType.END_CLICKED.getEventType(), beginEndPair.getRight()));
+                }
             } catch (RuntimeException e) {
                 e.printStackTrace();
                 importTextField.setStyle("-fx-text-fill: red; -fx-border-width: 2; -fx-border-color: red;");

@@ -38,10 +38,11 @@ public class HexagonDtoConverter {
 
         ShortestPathDto shortestPath = hexagonDto.getShortestPath();
 
-        HexShape begin = HexShapeDtoConverter.convertFromDto(shortestPath.getBegin());
-        HexShape end = HexShapeDtoConverter.convertFromDto(shortestPath.getEnd());
-        hexagon.getShortestPaths().put(new Pair<>(begin, end), shortestPath.getPath());
-
+        if (shortestPath != null){
+            HexShape begin = HexShapeDtoConverter.convertFromDto(shortestPath.getBegin());
+            HexShape end = HexShapeDtoConverter.convertFromDto(shortestPath.getEnd());
+            hexagon.getShortestPaths().put(new Pair<>(begin, end), shortestPath.getPath());
+        }
         return hexagon;
     }
 }
